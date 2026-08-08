@@ -1,0 +1,60 @@
+# =========================
+# Python & Bytecode
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# =========================
+# Virtual Environments
+# =========================
+# (This is the most important one since you created 'venv')
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# =========================
+# Environment Variables & Secrets
+# =========================
+# NEVER commit your OpenAI, Gemini, or Pinecone API keys
+.env
+.env.*
+!.env.example
+
+# =========================
+# Local Vector Databases & AI Models
+# =========================
+# If you end up using local ChromaDB or FAISS, ignore the generated db files
+chroma_db/
+.chroma/
+faiss_index/
+*.onnx
+*.pt
+*.bin
+*.h5
+
+# =========================
+# Logs and Databases
+# =========================
+*.log
+*.sqlite3
+
+# =========================
+# IDEs and OS Files
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# =========================
+# Hardware Manuals / Data (Optional)
+# =========================
+# If you don't want to commit heavy 500-page PDFs to GitHub, uncomment the line below.
+# (But if you want your team to have access to the same test manuals, leave it commented).
+# docs/*.pdf
