@@ -16,6 +16,8 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'ai'
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [debugResponse, setDebugResponse] = useState(null);
 
   /* ---------- restore / persist layout ---------- */
   useEffect(() => {
@@ -172,7 +174,14 @@ export default function Dashboard() {
             className={`min-w-0 flex-1 md:flex-none ${mobileTab === 'editor' ? 'flex' : 'hidden'} md:flex`}
             style={{ flexBasis: `${leftRatio * 100}%` }}
           >
-            <LeftWorkspace />
+            <LeftWorkspace 
+            onAnalyze={(res) => {
+                setDebugResponse(res);
+                setMobileTab('ai'); // Auto-switch to AI tab on mobile!
+              }}
+              isAnalyzing={isAnalyzing}
+              setIsAnalyzing={setIsAnalyzing}
+            />
           </div>
 
           <div
@@ -191,7 +200,10 @@ export default function Dashboard() {
           <div
             className={`min-w-0 flex-1 ${mobileTab === 'ai' ? 'flex' : 'hidden'} md:flex`}
           >
-            <RightWorkspace />
+            <RightWorkspace 
+              debugResponse={debugResponse} 
+              isAnalyzing={isAnalyzing}
+            />
           </div>
         </div>
       </div>

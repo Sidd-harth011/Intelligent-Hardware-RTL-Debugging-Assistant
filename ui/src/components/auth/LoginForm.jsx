@@ -1,7 +1,39 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const inputClass =
   'w-full rounded-lg border border-white/8 bg-white/[0.03] py-2.5 pl-10 pr-3 text-[13px] text-slate-200 placeholder-slate-600 outline-none transition-colors focus:border-teal-400/50 focus:ring-2 focus:ring-teal-400/15';
 
 export default function LoginForm({ toggleAuthMode }) {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(''); // Clear previous errors
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token); // Save the session token
+        navigate('/dashboard'); // Route to the IDE workspace
+      } else {
+        setError(data.message || 'Invalid credentials');
+      }
+    } catch (err) {
+      setError('Server connection failed. Is your backend running?');
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="mb-6 text-center">
@@ -13,7 +45,14 @@ export default function LoginForm({ toggleAuthMode }) {
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      {/* Error Message Display */}
+      {error && (
+        <div className="mb-4 rounded-md bg-red-500/10 p-3 text-center text-sm font-medium text-red-400">
+          {error}
+        </div>
+      )}
+
+      <form className="space-y-4" onSubmit={handleLogin}>
         <div className="space-y-1.5">
           <label className="block text-[12px] font-medium text-slate-400">Email address</label>
           <div className="relative">
@@ -23,7 +62,14 @@ export default function LoginForm({ toggleAuthMode }) {
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
             </span>
-            <input type="email" required placeholder="engineer@domain.com" className={inputClass} />
+            <input 
+              type="email" 
+              required 
+              placeholder="engineer@domain.com" 
+              className={inputClass} 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
         </div>
 
@@ -40,7 +86,14 @@ export default function LoginForm({ toggleAuthMode }) {
                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
               </svg>
             </span>
-            <input type="password" required placeholder="••••••••" className={inputClass} />
+            <input 
+              type="password" 
+              required 
+              placeholder="••••••••" 
+              className={inputClass} 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
         </div>
 
@@ -61,6 +114,7 @@ export default function LoginForm({ toggleAuthMode }) {
       </div>
 
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {/* We are keeping these standard buttons visually intact until we implement OAuth later */}
         <button className="flex items-center justify-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] py-2.5 text-[13px] font-medium text-slate-300 transition-colors hover:bg-white/[0.07]">
           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
             <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
