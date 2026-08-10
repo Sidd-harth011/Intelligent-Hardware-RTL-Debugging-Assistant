@@ -57,4 +57,4 @@ Thumbs.db
 # =========================
 # If you don't want to commit heavy 500-page PDFs to GitHub, uncomment the line below.
 # (But if you want your team to have access to the same test manuals, leave it commented).
-# docs/*.pdf
+docs/*.pdf

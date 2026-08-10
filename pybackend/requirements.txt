@@ -1,0 +1,18 @@
+# --- Web Server & API ---
+fastapi
+uvicorn
+pydantic
+
+# --- LangChain Core ---
+langchain
+langchain-community
+langchain-chroma
+langchain-huggingface
+
+# --- Document Parsing & Tokenization ---
+pypdf
+tiktoken
+
+# --- Vector Database & AI Models ---
+chromadb
+sentence-transformers
