@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './components/dashboard/Dashboard';
-
+import ProtectedRoute from './components/auth/ProtectedRoute';
 function App() {
   return (
     <BrowserRouter>
@@ -13,7 +13,11 @@ function App() {
         <Route path="/auth" element={<AuthPage />} />
         
         {/* The Main IDE Route */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
       </Routes>
     </BrowserRouter>
   );
