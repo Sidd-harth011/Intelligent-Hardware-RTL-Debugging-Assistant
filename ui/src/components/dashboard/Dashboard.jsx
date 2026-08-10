@@ -6,18 +6,74 @@ import RightWorkspace from './RightWorkspace';
 import Footer from './Footer';
 
 const STORE_KEY = 'ihd.layout.v1';
+const RECENT_FILES_KEY = 'ihd.recent_files.v1';
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+const DEFAULT_CODE = `// axi_interconnect.sv — paste Verilog / SystemVerilog / C++
+module axi_interconnect #(
+    parameter int N_MASTERS = 4,
+    parameter int DATA_W    = 64
+) (
+    input  logic clk,
+    input  logic rst_n,
+    axi_if.slave  m [N_MASTERS],
+    axi_if.master s
+);
+  // Round-robin arbiter across masters
+  logic [$clog2(N_MASTERS)-1:0] grant_q, grant_d;
+
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) grant_q <= '0;
+    else        grant_q <= grant_d;
+  end
+endmodule`;
 
 export default function Dashboard() {
   const shellRef = useRef(null);
   const [sidebarWidth, setSidebarWidth] = useState(264);
-  const [leftRatio, setLeftRatio] = useState(0.56); // left workspace share of the split
-  const [dragging, setDragging] = useState(null); // 'sidebar' | 'split' | null
+  const [leftRatio, setLeftRatio] = useState(0.56);
+  const [dragging, setDragging] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState('editor'); // 'editor' | 'ai'
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [debugResponse, setDebugResponse] = useState(null);
+
+  // Editor and File State
+  const [editorCode, setEditorCode] = useState(DEFAULT_CODE);
+  const [fileName, setFileName] = useState("axi_interconnect.sv");
+
+  // Recent Files History (Last 5 files persistent in localStorage)
+  const [recentFiles, setRecentFiles] = useState(() => {
+    try {
+      const saved = localStorage.getItem(RECENT_FILES_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return [{ name: "axi_interconnect.sv", content: DEFAULT_CODE }];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(recentFiles));
+    } catch (_) {}
+  }, [recentFiles]);
+
+  const handleFileImport = (content, name) => {
+    setEditorCode(content);
+    setFileName(name);
+    setDrawerOpen(false);
+
+    setRecentFiles((prev) => {
+      const filtered = prev.filter((f) => f.name !== name);
+      return [{ name, content }, ...filtered].slice(0, 5);
+    });
+  };
+
+  const handleSelectFile = (file) => {
+    setEditorCode(file.content);
+    setFileName(file.name);
+    setDrawerOpen(false);
+  };
 
   /* ---------- restore / persist layout ---------- */
   useEffect(() => {
@@ -101,27 +157,30 @@ export default function Dashboard() {
           else setDrawerOpen(true);
         }}
         sidebarOpen={sidebarOpen}
+        currentFileName={fileName}
       />
 
       {/* mobile pane switcher */}
-      <div className="z-20 flex shrink-0 gap-1 border-b border-white/5 bg-[#0d1015] p-1.5 md:hidden">
-        {[
-          { id: 'editor', label: 'Editor' },
-          { id: 'ai', label: 'AI Panel' },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setMobileTab(t.id)}
-            className={`flex-1 rounded-lg py-2 text-[13px] font-semibold transition-colors ${
-              mobileTab === t.id
-                ? 'bg-white/[0.07] text-slate-100 shadow-inner shadow-white/5'
-                : 'text-slate-500 hover:text-slate-300'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {!drawerOpen && (
+        <div className="z-20 flex shrink-0 gap-1 border-b border-white/5 bg-[#0d1015] p-1.5 md:hidden">
+          {[
+            { id: 'editor', label: 'Editor' },
+            { id: 'ai', label: 'AI Panel' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setMobileTab(t.id)}
+              className={`flex-1 rounded-lg py-2 text-[13px] font-semibold transition-colors ${
+                mobileTab === t.id
+                  ? 'bg-white/[0.07] text-slate-100 shadow-inner shadow-white/5'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div ref={shellRef} className="relative z-10 flex min-h-0 flex-1 overflow-hidden">
         {/* desktop sidebar */}
@@ -131,7 +190,13 @@ export default function Dashboard() {
               className="hidden min-h-0 shrink-0 md:block"
               style={{ width: `${sidebarWidth}px` }}
             >
-              <Sidebar />
+              <Sidebar 
+                onFileImport={handleFileImport}
+                currentFileName={fileName}
+                currentCode={editorCode}
+                recentFiles={recentFiles}
+                onSelectFile={handleSelectFile}
+              />
             </aside>
             <div
               role="separator"
@@ -150,21 +215,28 @@ export default function Dashboard() {
 
         {/* mobile drawer */}
         <div
-          className={`fixed inset-0 z-50 md:hidden ${drawerOpen ? '' : 'pointer-events-none'}`}
+          className={`fixed inset-0 z-50 md:hidden transition-all duration-300 ${drawerOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
           aria-hidden={!drawerOpen}
         >
           <div
             onClick={() => setDrawerOpen(false)}
-            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200 ${
+            className={`absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity duration-300 ${
               drawerOpen ? 'opacity-100' : 'opacity-0'
             }`}
           />
           <div
-            className={`absolute inset-y-0 left-0 w-[82%] max-w-[300px] shadow-2xl transition-transform duration-200 ${
+            className={`absolute inset-y-0 left-0 w-[82%] max-w-[300px] bg-[#0d1015] shadow-2xl transition-transform duration-300 ease-out z-50 ${
               drawerOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
-            <Sidebar onClose={() => setDrawerOpen(false)} />
+            <Sidebar 
+              onClose={() => setDrawerOpen(false)} 
+              onFileImport={handleFileImport}
+              currentFileName={fileName}
+              currentCode={editorCode}
+              recentFiles={recentFiles}
+              onSelectFile={handleSelectFile}
+            />
           </div>
         </div>
 
@@ -175,12 +247,15 @@ export default function Dashboard() {
             style={{ flexBasis: `${leftRatio * 100}%` }}
           >
             <LeftWorkspace 
-            onAnalyze={(res) => {
+              onAnalyze={(res) => {
                 setDebugResponse(res);
-                setMobileTab('ai'); // Auto-switch to AI tab on mobile!
+                setMobileTab('ai'); // Auto-switch to AI tab on mobile
               }}
               isAnalyzing={isAnalyzing}
               setIsAnalyzing={setIsAnalyzing}
+              externalCode={editorCode}
+              fileName={fileName}
+              onCodeChange={setEditorCode}
             />
           </div>
 

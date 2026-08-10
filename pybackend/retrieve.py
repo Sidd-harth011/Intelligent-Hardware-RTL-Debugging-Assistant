@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma # <-- Updated Import
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -19,8 +19,8 @@ retriever = db.as_retriever(search_kwargs={"k": 3})
 # 3. Initialize Groq LLM
 print("Booting up Groq Engine...")
 llm = ChatGroq(
-    temperature=0, # 0 means strictly factual and analytical, perfect for hardware docs
-    model_name="llama3-8b-8192", # Blazing fast, open-weights model
+    temperature=0, 
+    model_name="llama-3.1-8b-instant", # <-- Updated, state-of-the-art model ID
     api_key=os.environ.get("GROQ_API_KEY")
 )
 

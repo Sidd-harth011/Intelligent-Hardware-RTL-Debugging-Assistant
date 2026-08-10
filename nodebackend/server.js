@@ -12,6 +12,7 @@ app.use(cors());
 app.use(express.json()); // Parses incoming JSON requests
 app.use('/api/auth', authRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/ml', debugRoutes);
 const PORT = process.env.PORT || 5000;
 
 // Database Connection
