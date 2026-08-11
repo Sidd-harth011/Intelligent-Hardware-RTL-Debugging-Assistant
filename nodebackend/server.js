@@ -15,6 +15,13 @@ app.use('/api/debug', debugRoutes);
 app.use('/api/ml', debugRoutes);
 const PORT = process.env.PORT || 5000;
 
+const dns = require("dns");
+
+dns.setServers([
+    "8.8.8.8",
+    "1.1.1.1"
+]);
+
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB successfully connected'))

@@ -1,18 +1,29 @@
 # --- Web Server & API ---
+
 fastapi
 uvicorn
 pydantic
 
+
 # --- LangChain Core ---
+
 langchain
 langchain-community
-langchain-chroma
 langchain-huggingface
+langchain-groq
+
+
+# --- Pinecone Vector Database ---
+
+pinecone
+
 
 # --- Document Parsing & Tokenization ---
+
 pypdf
 tiktoken
 
-# --- Vector Database & AI Models ---
-chromadb
+
+# --- Embeddings & AI Models ---
+
 sentence-transformers
