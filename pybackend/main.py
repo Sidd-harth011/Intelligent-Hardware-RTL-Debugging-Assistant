@@ -7,7 +7,7 @@ import re
 from dotenv import load_dotenv
 from pinecone import Pinecone
 
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 
@@ -57,10 +57,10 @@ if not GROQ_API_KEY:
 
 print("Booting up RAG Engine...")
 
-print("Loading HuggingFace embedding model...")
-
-embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"
+print("Connecting to HuggingFace Inference API...")
+embeddings = HuggingFaceEndpointEmbeddings(
+    model="sentence-transformers/all-MiniLM-L6-v2",
+    huggingfacehub_api_token=os.environ.get("HF_TOKEN")
 )
 
 print("✅ Embedding model loaded.")

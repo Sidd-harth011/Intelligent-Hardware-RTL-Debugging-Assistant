@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from pinecone import Pinecone
 
 
@@ -210,8 +209,9 @@ def process_manuals():
 
     try:
 
-        embeddings = HuggingFaceEmbeddings(
-            model_name="all-MiniLM-L6-v2"
+        embeddings = HuggingFaceEndpointEmbeddings(
+            model="sentence-transformers/all-MiniLM-L6-v2",
+            huggingfacehub_api_token=os.environ.get("HF_TOKEN")
         )
 
 
