@@ -14,7 +14,7 @@ exports.analyzeDesign = async (req, res) => {
     console.log("Forwarding payload to Python ML Microservice...");
 
     // The Bridge: Send data from Node (Port 5000) to Python (Port 8000)
-    const pythonResponse = await fetch('http://localhost:8000/api/ml/analyze', {
+    const pythonResponse = await fetch('https://intelligent-hardware-rtl-debugging.onrender.com/api/ml/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, prompt })
