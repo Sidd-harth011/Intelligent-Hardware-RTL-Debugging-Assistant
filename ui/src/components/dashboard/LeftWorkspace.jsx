@@ -29,7 +29,7 @@ export default function LeftWorkspace({ onAnalyze, isAnalyzing, setIsAnalyzing, 
     setIsAnalyzing(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/ml/analyze', {
+      const response = await fetch('https://intelligent-hardware-rtl-debugging-mzh7.onrender.com/api/ml/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, prompt }),
